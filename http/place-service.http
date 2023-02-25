@@ -1,0 +1,10 @@
+GET http://localhost:10001/cities?q=Vadodara
+
+###
+POST http://localhost:10001/cities
+Content-Type: application/json
+
+{
+  "code": "VRD",
+  "name": "Vadodara"
+}

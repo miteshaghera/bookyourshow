@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false"
+                           pattern="%style{%date{ISO8601}}{cyan} %style{%level}{green} [%style{%X{nodeId}}{red}] [%style{%thread}{blue}] %style{%logger{1.}.%method:%line}{yellow} %style{%msg%n%throwable}{magenta}"/>
+            <!--<JSONLayout complete="false" compact="false" stacktraceAsString="true" eventEOL="true" properties="true"/>-->
+        </Console>
+        <RollingFile name="applicationLog"
+                     fileName="/var/place-service/logs/application.log"
+                     filePattern="/var/place-service/logs/archive/application-%d{yyyy-MM-dd}.%i.log.gz">
+            <JSONLayout complete="false" compact="true" stacktraceAsString="true" eventEOL="true" properties="true"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="/var/place-service/logs/archive" maxDepth="1">
+                    <IfFileName glob="*application*.log.gz"/>
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="requestResponseLog"
+                     fileName="/var/place-service/logs/access.log"
+                     filePattern="/var/place-service/logs/archive/access-%d{yyyy-MM-dd}.%i.log.gz">
+            <JSONLayout complete="false" compact="true" stacktraceAsString="true" eventEOL="true" properties="true"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="/var/place-service/logs/archive" maxDepth="1">
+                    <IfFileName glob="*access*.log.gz"/>
+                    <IfLastModified age="7d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <asyncRoot level="info">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="applicationLog"/>
+        </asyncRoot>
+        <asyncLogger name="com.xyz.bp" level="debug"/>
+        <asyncLogger name="io.vertx.ext.web.handler.impl.LoggerHandlerImpl" additivity="false">
+            <AppenderRef ref="requestResponseLog"/>
+        </asyncLogger>
+        <asyncLogger name="org.mongodb.driver.connection" level="WARN"/>
+    </Loggers>
+</Configuration>

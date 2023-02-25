@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: Theater Platform
+  description: Theater Platform
+  version: 1.0.0
+paths:
+  /places:
+    get:
+      tags:
+        - Booking platform
+      operationId: searchCities
+      description: Get available places (matched by q parameter)
+      parameters:
+        - style: form
+          in: query
+          name: q
+          description: Keywords to search a city
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    name:
+                      type: string
+                      description: Display name of the city
+                    code:
+                      type: string
+                      description: unique 3 character code of the city
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  /places/{place}/movies:
+    get:
+      tags:
+        - Booking platform
+      operationId: searchMovies
+      description: Get available movies for provided city
+      parameters:
+        - style: form
+          in: query
+          name: q
+          description: title, genre, language etc
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      description: Unique identifier of the movie
+                    title:
+                      type: string
+                      description: Name of the movie
+                    genre:
+                      type: array
+                      description: Genre of the movie
+                    language:
+                      type: array
+                      description: Language of the movie
+                    releaseDate:
+                      type: string
+                      description: release date of the movie
+        404:
+          $ref: '#/components/responses/404'
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  /places/{place}/theaters:
+    get:
+      tags:
+        - Booking platform
+      operationId: searchTheaters
+      description: Get list of theaters where selected movie is released in selected city
+      parameters:
+        - style: form
+          in: query
+          name: movie
+          description: selected movie id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful response with list of theaters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      description: Unique identifier of the theater
+                    name:
+                      type: string
+                      description: Name of theater/theater partner
+                    shortAddress:
+                      type: string
+                      description: Short address line/land mark/area
+                    address:
+                      type: string
+                      description: full address
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+  /theaters/{theater}/shows:
+    get:
+      tags:
+        - Booking platform
+      description: Find shows running by a theater for selected movie & selected theater in given city with selected timings/date
+      operationId: searchShows
+      parameters:
+        - style: form
+          in: query
+          name: date
+          description: selected date
+          required: false
+          schema:
+            type: string
+            format: date
+            default: today
+      responses:
+        200:
+          description: Successful response with available shows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      description: Unique identifier of the show
+                    timing:
+                      type: string
+                      format: datetime
+                      description: Time of when show starts
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+  /shows/{show}/seats:
+    get:
+      tags:
+        - Booking platform
+      description: Returns totals/available seats
+      operationId: searchSeats
+      responses:
+        200:
+          description: Successful response with total seats & available seats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  availableSeats:
+                    type: array
+                    description: list of available seats
+                    items:
+                      properties:
+                        id:
+                          type: string
+                          description: unique identifier of a seat
+                        seatNumber:
+                          type: string
+                          description: physical seat number provided by theater partner.
+                        category:
+                          type: string
+                          description: category of the seat
+                        price:
+                          type: number
+                          description: price of the seat
+                  totalSeats:
+                    type: integer
+                    description: total number of seats in the show
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+
+  /bookings:
+    post:
+      tags:
+        - Booking platform
+      operationId: bookTickets
+      description: bookTickets for selected seats
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              description: selected seat ids
+      responses:
+        201:
+          description: Successful response if booking is successfully done
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: unique identifier of a booking
+                  status:
+                    type: string
+                    description: stauts of a booking
+                  seats:
+                    type: array
+                    description: seat numbers booked
+                  time:
+                    type: string
+                    description: show timing
+                  screen:
+                    type: string
+                    description: screen name/number
+                  theater:
+                    type: string
+                    description: name of the theater & short address
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: When same seats are already booked by other user
+        500:
+          $ref: '#/components/responses/500'
+
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          nullable: false
+          description: Code representing failure reason
+          type: string
+          readOnly: true
+        message:
+          nullable: true
+          description: Human understandable description of the code
+          type: string
+          readOnly: true
+  responses:
+    '400':
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request to server is not in appropriate format or invalid
+    '404':
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Resource with id is not present in the system.
+    '500':
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Something went wrong completely

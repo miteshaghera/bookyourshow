@@ -1,0 +1,8 @@
+{
+  "http": {
+    "port": 10001
+  },
+  "mongodb": {
+    "connection_string": "mongodb://localhost:27017/places_db?maxPoolSize=30&minPoolSize=10&maxIdleTimeMS=300000&maxLifeTimeMS=3600000&waitQueueTimeoutMS=60000&connectTimeoutMS=300000&socketTimeoutMS=10000"
+  }
+}

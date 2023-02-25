@@ -1,0 +1,5 @@
+GET http://localhost:10010/cities/VDR/movies
+
+###
+POST http://localhost:10010/movies
+Content-Type: application/json
